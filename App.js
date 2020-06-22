@@ -1,29 +1,62 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
+import { StyleSheet, Text, View, FlatList , Alert ,TouchableWithoutFeedback,Keyboard} from 'react-native';
+import Header from './components/header';
+import TodoItem from './components/todoItems';
+import AddToDo from './components/addTodo';
+
 
 export default function App() {
-  const [name, setName] = useState('shaun');
-  const [person, setPerson] = useState({ name: 'mario', age: 40 });
+  const [todos, setTodos] = useState([
+    { text: 'make coffee', key: '1' },
+    { text: 'create an app', key: '2' },
+    { text: 'finish the novel', key: '3' },
+    { text: 'submit the project', key: '4' }
+  ]);
 
-  const clickHandler = () => {
-    setName('chun-li');
-    setPerson({ name: 'luigi', age: 45 });
-  };
+  const pressHandler = (key) => {
+    setTodos(prevTodos => {
+      return prevTodos.filter(todo => todo.key != key);
+    });
+  }
+
+  const submitHandler = (text) => {
+
+    if (text.length > 3)
+    {
+    setTodos((prevTodos)=>{
+      return [
+        {text: text, key: Math.random().toString() },
+        ... prevTodos
+      ];
+    })
+    }
+    else{
+      Alert.alert('OOPS!','ToDos must be more than 3 letter long',[
+        {text:'Understood'}
+      ]);
+    }
+  }
 
   return (
-    <View style={styles.container}>
-      <Text>
-        Enter name:
-      </Text>
-      <TextInput
-      onChangeText  
-      style={styles.input}/>
-      <Text>My name is {name}</Text>
-      <Text>His name is {person.name} and his age is {person.age}</Text>
-      <View style={styles.buttonContainer}>
-        <Button title='update state' onPress={clickHandler} />  
+    <TouchableWithoutFeedback onPress={()=>{
+      Keyboard.dismiss();
+      console.log('dismissed keyboard');
+    }}>
+      <View style={styles.container}>
+        <Header />
+        <View style={styles.content}>
+          <AddToDo submitHandler={submitHandler}/>
+          <View style={styles.list}>
+            <FlatList
+              data={todos}
+              renderItem={({ item }) => (
+                <TodoItem item={item} pressHandler={pressHandler} />
+              )}
+            />
+          </View>
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -31,17 +64,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  buttonContainer: {
+  content: {
+    padding: 40,
+  },
+  list: {
     marginTop: 20,
   },
-  input :{
-    borderWidth: 1,
-    borderColor: '#777',
-    margin: 10,
-    width:200,
-    padding:20,
-  }
 });
